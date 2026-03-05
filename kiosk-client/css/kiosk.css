@@ -286,6 +286,13 @@ html, body {
 }
 .btn-stop:hover:not(:disabled) { background: rgba(248, 113, 113, 0.15); }
 
+.btn-pause {
+  background: rgba(251, 146, 60, 0.08);
+  color: #fb923c;
+  border-color: rgba(251, 146, 60, 0.25);
+}
+.btn-pause:hover:not(:disabled) { background: rgba(251, 146, 60, 0.15); }
+
 .btn-next {
   background: rgba(200, 169, 74, 0.08);
   color: var(--gold);

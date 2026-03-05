@@ -24,13 +24,16 @@ const TRANSLATIONS = {
     btnFocus:          'Start Focus',
     btnBreak:          'Start Break',
     btnStop:           'Stop',
+    btnPause:          'Pause',
+    btnResume:         'Resume',
     btnNext:           'Next Block',
     btnReset:          'Reset',
+    hint_paused:       'Timer paused',
     modalTitle:        'Reset Session?',
     modalBody:         'This will clear all participants and return to Block 1. This cannot be undone.',
     btnResetConfirm:   'Yes, Reset',
     btnCancel:         'Cancel',
-    statusApp:         'Working Local · Focus Kiosk v1.1.1',
+    statusApp:         'Working Local · Focus Kiosk v1.1.3',
     connecting:        'Connecting…',
     connected:         'Connected',
     disconnected:      'Disconnected',
@@ -56,13 +59,16 @@ const TRANSLATIONS = {
     btnFocus:          'Start Focus',
     btnBreak:          'Start Pauze',
     btnStop:           'Stop',
+    btnPause:          'Pauzeer',
+    btnResume:         'Hervat',
     btnNext:           'Volgend Blok',
     btnReset:          'Herstart',
+    hint_paused:       'Timer gepauzeerd',
     modalTitle:        'Sessie herstarten?',
     modalBody:         'Dit wist alle deelnemers en keert terug naar Blok 1. Dit kan niet ongedaan worden gemaakt.',
     btnResetConfirm:   'Ja, herstarten',
     btnCancel:         'Annuleren',
-    statusApp:         'Working Local · Focus Kiosk v1.1.1',
+    statusApp:         'Working Local · Focus Kiosk v1.1.3',
     connecting:        'Verbinden…',
     connected:         'Verbonden',
     disconnected:      'Verbroken',
@@ -88,6 +94,7 @@ function applyStaticTranslations() {
   document.querySelector('#btn-break span:last-child').textContent = tr('btnBreak');
   document.querySelector('#btn-stop span:last-child').textContent  = tr('btnStop');
   document.querySelector('#btn-next span:last-child').textContent  = tr('btnNext');
+  // Pause button label is managed by renderControls (toggles between Pause/Resume)
   document.querySelector('#btn-reset span:last-child').textContent = tr('btnReset');
   btnResetConfirm.textContent = tr('btnResetConfirm');
   btnCancel.textContent       = tr('btnCancel');
@@ -100,10 +107,12 @@ function applyStaticTranslations() {
 
   // Re-render dynamic parts using current state
   if (currentState) {
+    const p = currentState.timer.paused || false;
     blockEl.textContent = tr('blockDisplay', currentState.session.currentBlock);
     dateEl.textContent  = formatDate(currentState.session.date);
     renderPhase(currentState.session.phase);
-    renderHint(currentState.session.phase, currentState.timer.running);
+    renderControls(currentState.session.phase, p);
+    renderHint(currentState.session.phase, currentState.timer.running, p);
     renderParticipants(currentState.participants || [], currentState.session.currentBlock);
   }
 }
@@ -176,6 +185,7 @@ const ringTicksEl  = document.getElementById('ring-ticks');
 const btnFocus  = document.getElementById('btn-focus');
 const btnBreak  = document.getElementById('btn-break');
 const btnStop   = document.getElementById('btn-stop');
+const btnPause  = document.getElementById('btn-pause');
 const btnNext   = document.getElementById('btn-next');
 const btnReset  = document.getElementById('btn-reset');
 
@@ -229,17 +239,21 @@ function renderPhase(phase) {
   else phaseEl.textContent = '';
 }
 
-function renderHint(phase, running) {
-  if (phase === 'focus' && running) hintEl.textContent = tr('hint_focus');
+function renderHint(phase, running, paused = false) {
+  if (paused) hintEl.textContent = tr('hint_paused');
+  else if (phase === 'focus' && running) hintEl.textContent = tr('hint_focus');
   else if (phase === 'break' && running) hintEl.textContent = tr('hint_break');
   else hintEl.textContent = tr('hint_idle');
 }
 
-function renderControls(phase) {
-  const running = phase !== 'idle';
-  btnFocus.disabled = (phase === 'focus');
-  btnBreak.disabled = (phase === 'break');
-  btnStop.disabled  = !running;
+function renderControls(phase, paused = false) {
+  const active = phase !== 'idle';
+  btnFocus.disabled = active;
+  btnBreak.disabled = active;
+  btnStop.disabled  = !active;
+  btnPause.disabled = !active;
+  btnPause.querySelector('span.btn-icon').textContent    = paused ? '▶' : '⏸';
+  btnPause.querySelector('span:last-child').textContent  = paused ? tr('btnResume') : tr('btnPause');
 }
 
 function renderParticipants(participants, currentBlock) {
@@ -281,9 +295,10 @@ function applyState(state) {
   dateEl.textContent  = formatDate(state.session.date);
   blockEl.textContent = tr('blockDisplay', state.session.currentBlock);
 
+  const paused = state.timer.paused || false;
   renderPhase(state.session.phase);
-  renderControls(state.session.phase);
-  renderHint(state.session.phase, state.timer.running);
+  renderControls(state.session.phase, paused);
+  renderHint(state.session.phase, state.timer.running, paused);
 
   const displayTime = state.timer.running
     ? state.timer.remaining
@@ -417,12 +432,33 @@ socket.on('timer:start', ({ type, remaining, duration }) => {
   updateRing(remaining, ringDuration, type);
   renderTimer(remaining, type);
   renderPhase(type);
-  renderControls(type);
-  renderHint(type, true);
+  renderControls(type, false);
+  renderHint(type, true, false);
   if (currentState) {
     currentState.timer.running = true;
+    currentState.timer.paused = false;
     currentState.timer.type = type;
     currentState.session.phase = type;
+  }
+});
+
+socket.on('timer:paused', ({ remaining, type }) => {
+  renderTimer(remaining, type);
+  renderControls(type, true);
+  renderHint(type, false, true);
+  if (currentState) {
+    currentState.timer.running = false;
+    currentState.timer.paused = true;
+  }
+});
+
+socket.on('timer:resumed', ({ remaining, type }) => {
+  renderTimer(remaining, type);
+  renderControls(type, false);
+  renderHint(type, true, false);
+  if (currentState) {
+    currentState.timer.running = true;
+    currentState.timer.paused = false;
   }
 });
 
@@ -484,6 +520,10 @@ socket.on('participants:updated', ({ participants }) => {
 btnFocus.addEventListener('click', () => socket.emit('timer:startFocus'));
 btnBreak.addEventListener('click', () => socket.emit('timer:startBreak'));
 btnStop.addEventListener('click',  () => socket.emit('timer:stop'));
+btnPause.addEventListener('click', () => {
+  const paused = currentState && currentState.timer.paused;
+  socket.emit(paused ? 'timer:resume' : 'timer:pause');
+});
 btnNext.addEventListener('click',  () => socket.emit('session:nextBlock'));
 
 btnReset.addEventListener('click', () => {

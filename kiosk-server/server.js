@@ -42,6 +42,7 @@ function createInitialState() {
     participants: [],
     timer: {
       running: false,
+      paused: false,
       type: null, // 'focus' | 'break'
       remaining: 0,
       duration: 0,
@@ -83,12 +84,27 @@ function saveState() {
 // ---------------------------------------------------------------------------
 let timerInterval = null;
 
+function handleTimerEnd() {
+  const finishedType = state.timer.type;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  state.timer.running = false;
+  state.timer.paused = false;
+  state.session.phase = 'idle';
+  if (finishedType === 'focus') {
+    state.session.currentBlock += 1;
+  }
+  saveState();
+  ws.emit('timer:end', { type: finishedType });
+  ws.emit('session:state', state);
+}
+
 function startTimer(type) {
   stopTimer(false); // stop without broadcast
 
   const duration = type === 'focus' ? FOCUS_DURATION : BREAK_DURATION;
 
-  state.timer = { running: true, type, remaining: duration, duration };
+  state.timer = { running: true, paused: false, type, remaining: duration, duration };
   state.session.phase = type;
   saveState();
 
@@ -96,31 +112,31 @@ function startTimer(type) {
 
   timerInterval = setInterval(() => {
     state.timer.remaining -= 1;
+    ws.emit('timer:tick', { remaining: state.timer.remaining, type: state.timer.type });
+    if (state.timer.remaining <= 0) handleTimerEnd();
+  }, 1000);
+}
 
-    ws.emit('timer:tick', {
-      remaining: state.timer.remaining,
-      type: state.timer.type,
-    });
+function pauseTimer() {
+  if (!state.timer.running || !timerInterval) return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  state.timer.running = false;
+  state.timer.paused = true;
+  saveState();
+  ws.emit('timer:paused', { remaining: state.timer.remaining, type: state.timer.type });
+}
 
-    if (state.timer.remaining <= 0) {
-      const finishedType = state.timer.type;
-      clearInterval(timerInterval);
-      timerInterval = null;
-
-      state.timer.running = false;
-      state.session.phase = 'idle';
-
-      // Advance block after each completed focus session
-      if (finishedType === 'focus') {
-        state.session.currentBlock += 1;
-      }
-
-      saveState();
-
-      ws.emit('timer:end', { type: finishedType });
-      // Broadcast updated session state so all clients refresh block/phase display
-      ws.emit('session:state', state);
-    }
+function resumeTimer() {
+  if (!state.timer.paused) return;
+  state.timer.running = true;
+  state.timer.paused = false;
+  saveState();
+  ws.emit('timer:resumed', { remaining: state.timer.remaining, type: state.timer.type });
+  timerInterval = setInterval(() => {
+    state.timer.remaining -= 1;
+    ws.emit('timer:tick', { remaining: state.timer.remaining, type: state.timer.type });
+    if (state.timer.remaining <= 0) handleTimerEnd();
   }, 1000);
 }
 
@@ -130,6 +146,7 @@ function stopTimer(broadcast = true) {
     timerInterval = null;
   }
   state.timer.running = false;
+  state.timer.paused = false;
   state.session.phase = 'idle';
   saveState();
   if (broadcast) {
@@ -247,6 +264,16 @@ ws.on('connection', (socket) => {
   socket.on('timer:stop', () => {
     console.log('[ws] timer:stop');
     stopTimer(true);
+  });
+
+  socket.on('timer:pause', () => {
+    console.log('[ws] timer:pause');
+    pauseTimer();
+  });
+
+  socket.on('timer:resume', () => {
+    console.log('[ws] timer:resume');
+    resumeTimer();
   });
 
   // --- Session controls ---
