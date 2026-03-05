@@ -53,12 +53,15 @@ html, body {
   flex-shrink: 0;
 }
 
-.header-left,
-.header-right {
+.header-left {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .header-right {
+  flex: 1;
   text-align: right;
 }
 
@@ -67,11 +70,10 @@ html, body {
 }
 
 .header-logo {
-  height: 22px;
+  height: 44px;
   width: auto;
   display: block;
-  margin-bottom: 4px;
-  filter: brightness(0) invert(1) opacity(0.55);
+  flex-shrink: 0;
 }
 
 .header-logo-fallback {
@@ -80,13 +82,27 @@ html, body {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--focus-color);
-  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.header-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .header-date {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   letter-spacing: 0.02em;
+}
+
+.header-time {
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
 .header-block {
@@ -177,7 +193,7 @@ html, body {
 
 .ring-track.focus { stroke: var(--focus-color); opacity: 0.75; }
 .ring-track.break { stroke: var(--break-color); opacity: 0.75; }
-.ring-track.idle  { stroke: var(--text-dim);    opacity: 0.5;  }
+.ring-track.idle  { stroke: rgba(255, 255, 255, 0.14); opacity: 1; }
 
 .ring-tick {
   stroke: rgba(255, 255, 255, 0.2);
@@ -420,6 +436,34 @@ html, body {
 .status-connection.connected::before { color: var(--break-color); }
 .status-connection.disconnected { color: var(--stop-color); }
 .status-connection.disconnected::before { color: var(--stop-color); }
+
+/* ─── Language toggle ─────────────────────────────────────────────────────── */
+.lang-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lang-btn.active {
+  background: var(--focus-color);
+  color: #fff;
+}
 
 /* ─── Modal ───────────────────────────────────────────────────────────────── */
 .modal-overlay {

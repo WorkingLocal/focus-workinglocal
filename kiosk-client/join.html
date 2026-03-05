@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,17 +16,25 @@
 
     <!-- ── Logo / branding ─────────────────────────────────────────────── -->
     <div class="brand">
-      <img
-        src="https://workinglocal.be/wp-content/uploads/2023/12/Digitale-onafhankelijkheid-1.png"
-        alt="Working Local"
-        class="brand-logo"
-        onerror="this.style.display='none'; document.getElementById('brand-fallback').style.display='flex';"
-      />
-      <div id="brand-fallback" class="brand-fallback" style="display:none">
-        <div class="brand-mark">◉</div>
-        <div class="brand-name">Working Local</div>
+      <div class="brand-row">
+        <div class="brand-identity">
+          <img
+            src="https://workinglocal.be/wp-content/uploads/2023/12/Digitale-onafhankelijkheid-1.png"
+            alt="Working Local"
+            class="brand-logo"
+            onerror="this.style.display='none'; document.getElementById('brand-fallback').style.display='flex';"
+          />
+          <div id="brand-fallback" class="brand-fallback" style="display:none">
+            <div class="brand-mark">◉</div>
+            <div class="brand-name">Working Local</div>
+          </div>
+        </div>
+        <div class="lang-toggle">
+          <button class="lang-btn" data-lang="nl">NL</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
       </div>
-      <div class="brand-sub">Focus Session</div>
+      <div class="brand-sub" id="brand-sub-el">Focussessie</div>
     </div>
 
     <!-- ── Registration form ───────────────────────────────────────────── -->
@@ -35,13 +43,13 @@
 
         <!-- Name -->
         <div class="field-group">
-          <label class="field-label" for="name">Your Name</label>
+          <label class="field-label" id="name-label-el" for="name">Jouw naam</label>
           <input
             type="text"
             id="name"
             name="name"
             class="field-input"
-            placeholder="e.g. Alex"
+            placeholder="bijv. Alex"
             maxlength="60"
             autocomplete="name"
             autocorrect="off"
@@ -51,20 +59,20 @@
 
         <!-- Block count -->
         <div class="field-group">
-          <label class="field-label">Focus Blocks</label>
+          <label class="field-label" id="blocks-label-el">Focus blokken</label>
           <div class="block-choice">
             <label class="choice-card" id="choice-6">
               <input type="radio" name="blockCount" value="6" />
               <div class="choice-body">
-                <div class="choice-title">6 Blocks</div>
-                <div class="choice-sub">~3 hours</div>
+                <div class="choice-title" id="choice-6-title">6 Blokken</div>
+                <div class="choice-sub" id="choice-6-sub">~3 uur</div>
               </div>
             </label>
             <label class="choice-card" id="choice-12">
               <input type="radio" name="blockCount" value="12" />
               <div class="choice-body">
-                <div class="choice-title">12 Blocks</div>
-                <div class="choice-sub">~6 hours</div>
+                <div class="choice-title" id="choice-12-title">12 Blokken</div>
+                <div class="choice-sub" id="choice-12-sub">~6 uur</div>
               </div>
             </label>
           </div>
@@ -73,8 +81,8 @@
         <!-- Task fields (revealed after block count selection) -->
         <div id="tasks-section" class="tasks-section" style="display:none">
           <div class="tasks-header">
-            <span class="field-label">Tasks Per Block</span>
-            <span class="tasks-hint">What will you work on in each 25-minute block?</span>
+            <span class="field-label" id="tasks-label-el">Taken per blok</span>
+            <span class="tasks-hint" id="tasks-hint-el">Waar werk je aan in elk 25-minutenblok?</span>
           </div>
           <div id="tasks-container"></div>
         </div>
@@ -84,7 +92,7 @@
 
         <!-- Submit -->
         <button type="submit" class="btn-submit" id="btn-submit" disabled>
-          Join Session
+          Sessie deelnemen
         </button>
 
       </form>
@@ -101,24 +109,24 @@
 
       <div class="session-panel">
         <div class="session-row">
-          <span class="session-label">Current Block</span>
+          <span class="session-label" id="current-block-label-el">Huidig blok</span>
           <span class="session-value" id="current-block">—</span>
         </div>
         <div class="session-row">
-          <span class="session-label">Phase</span>
-          <span class="phase-badge idle" id="current-phase">Waiting</span>
+          <span class="session-label" id="phase-label-el">Fase</span>
+          <span class="phase-badge idle" id="current-phase">Wachten</span>
         </div>
         <div class="session-row">
-          <span class="session-label">Timer</span>
+          <span class="session-label" id="timer-label-el">Timer</span>
           <span class="session-value timer-value" id="current-timer">—:——</span>
         </div>
         <div class="my-task-box">
-          <div class="my-task-label">Your task this block:</div>
+          <div class="my-task-label" id="my-task-label-el">Jouw taak dit blok:</div>
           <div class="my-task-text" id="my-task">—</div>
         </div>
       </div>
 
-      <button class="btn-update" onclick="location.reload()">Update My Tasks</button>
+      <button class="btn-update" id="btn-update-el" onclick="location.reload()">Taken bijwerken</button>
 
     </section>
 

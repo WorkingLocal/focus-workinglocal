@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
@@ -22,7 +22,10 @@
         onerror="this.style.display='none'; document.getElementById('header-logo-fallback').style.display='block';"
       />
       <span id="header-logo-fallback" class="header-logo-fallback" style="display:none">Working Local</span>
-      <div class="header-date" id="date-display">—</div>
+      <div class="header-datetime">
+        <div class="header-date" id="date-display">—</div>
+        <div class="header-time" id="time-display">—:——:——</div>
+      </div>
     </div>
     <div class="header-center">
       <div class="header-block" id="block-display">Block 1</div>
@@ -96,8 +99,12 @@
 
   <!-- ── Status bar ─────────────────────────────────────────────────────── -->
   <footer class="status-bar">
-    <span class="status-app">Working Local · Focus Kiosk v1.1.0</span>
-    <span class="status-connection" id="connection-status">Connecting…</span>
+    <span class="status-app">Working Local · Focus Kiosk v1.1.1</span>
+    <div class="lang-toggle">
+      <button class="lang-btn" data-lang="nl">NL</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <span class="status-connection" id="connection-status">Verbinden…</span>
   </footer>
 
   <!-- ── Reset confirm modal ───────────────────────────────────────────── -->

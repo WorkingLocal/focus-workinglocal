@@ -1,6 +1,123 @@
 'use strict';
 
 // ---------------------------------------------------------------------------
+// i18n — NL / EN translations
+// ---------------------------------------------------------------------------
+const TRANSLATIONS = {
+  en: {
+    phaseLabel_focus:  'Focus Block',
+    phaseLabel_break:  'Break',
+    hint_focus:        'Timer running — stay focused',
+    hint_break:        'Break in progress — rest up',
+    hint_idle:         'Ready to start',
+    blockDisplay:      n => `Block ${n}`,
+    noTask:            '(no task for this block)',
+    emptyText:         'No participants yet',
+    emptySub:          'Share the join link above',
+    joinLabel:         'Participants join at:',
+    participantsTitle: 'Participants',
+    focusComplete:     'Focus block complete!',
+    breakComplete:     'Break complete!',
+    blocksWord:        'blocks',
+    joinedWord:        'joined',
+    doneWord:          'done',
+    btnFocus:          'Start Focus',
+    btnBreak:          'Start Break',
+    btnStop:           'Stop',
+    btnNext:           'Next Block',
+    btnReset:          'Reset',
+    modalTitle:        'Reset Session?',
+    modalBody:         'This will clear all participants and return to Block 1. This cannot be undone.',
+    btnResetConfirm:   'Yes, Reset',
+    btnCancel:         'Cancel',
+    statusApp:         'Working Local · Focus Kiosk v1.1.1',
+    connecting:        'Connecting…',
+    connected:         'Connected',
+    disconnected:      'Disconnected',
+    dateLocale:        'en-US',
+  },
+  nl: {
+    phaseLabel_focus:  'Focus Blok',
+    phaseLabel_break:  'Pauze',
+    hint_focus:        'Timer loopt — blijf geconcentreerd',
+    hint_break:        'Pauze bezig — rust even uit',
+    hint_idle:         'Klaar om te starten',
+    blockDisplay:      n => `Blok ${n}`,
+    noTask:            '(geen taak voor dit blok)',
+    emptyText:         'Nog geen deelnemers',
+    emptySub:          'Deel de link hierboven',
+    joinLabel:         'Deelnemers verbinden via:',
+    participantsTitle: 'Deelnemers',
+    focusComplete:     'Focus blok voltooid!',
+    breakComplete:     'Pauze voltooid!',
+    blocksWord:        'blokken',
+    joinedWord:        'ingeschreven',
+    doneWord:          'klaar',
+    btnFocus:          'Start Focus',
+    btnBreak:          'Start Pauze',
+    btnStop:           'Stop',
+    btnNext:           'Volgend Blok',
+    btnReset:          'Herstart',
+    modalTitle:        'Sessie herstarten?',
+    modalBody:         'Dit wist alle deelnemers en keert terug naar Blok 1. Dit kan niet ongedaan worden gemaakt.',
+    btnResetConfirm:   'Ja, herstarten',
+    btnCancel:         'Annuleren',
+    statusApp:         'Working Local · Focus Kiosk v1.1.1',
+    connecting:        'Verbinden…',
+    connected:         'Verbonden',
+    disconnected:      'Verbroken',
+    dateLocale:        'nl-BE',
+  },
+};
+
+let currentLang = localStorage.getItem('focus-lang') || 'nl';
+
+function tr(key, arg) {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.nl;
+  const val  = dict[key];
+  return typeof val === 'function' ? val(arg) : (val ?? key);
+}
+
+function applyStaticTranslations() {
+  document.querySelector('.participants-title').textContent        = tr('participantsTitle');
+  document.querySelector('.header-join-label').textContent         = tr('joinLabel');
+  document.querySelector('#reset-modal h2').textContent            = tr('modalTitle');
+  document.querySelector('#reset-modal p').textContent             = tr('modalBody');
+  document.querySelector('.status-app').textContent                = tr('statusApp');
+  document.querySelector('#btn-focus span:last-child').textContent = tr('btnFocus');
+  document.querySelector('#btn-break span:last-child').textContent = tr('btnBreak');
+  document.querySelector('#btn-stop span:last-child').textContent  = tr('btnStop');
+  document.querySelector('#btn-next span:last-child').textContent  = tr('btnNext');
+  document.querySelector('#btn-reset span:last-child').textContent = tr('btnReset');
+  btnResetConfirm.textContent = tr('btnResetConfirm');
+  btnCancel.textContent       = tr('btnCancel');
+
+  // Update connection status text to match current state
+  const cls = statusEl.className;
+  statusEl.textContent = cls.includes('connected') && !cls.includes('disconnected')
+    ? tr('connected')
+    : cls.includes('disconnected') ? tr('disconnected') : tr('connecting');
+
+  // Re-render dynamic parts using current state
+  if (currentState) {
+    blockEl.textContent = tr('blockDisplay', currentState.session.currentBlock);
+    dateEl.textContent  = formatDate(currentState.session.date);
+    renderPhase(currentState.session.phase);
+    renderHint(currentState.session.phase, currentState.timer.running);
+    renderParticipants(currentState.participants || [], currentState.session.currentBlock);
+  }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('focus-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.lang === lang)
+  );
+  applyStaticTranslations();
+}
+
+// ---------------------------------------------------------------------------
 // Socket.IO — connect to /ws namespace
 // ---------------------------------------------------------------------------
 const socket = io('/ws');
@@ -46,6 +163,7 @@ const timerEl      = document.getElementById('timer-display');
 const phaseEl      = document.getElementById('phase-label');
 const blockEl      = document.getElementById('block-display');
 const dateEl       = document.getElementById('date-display');
+const timeEl       = document.getElementById('time-display');
 const hintEl       = document.getElementById('timer-hint');
 const participantsEl = document.getElementById('participants-list');
 const countEl      = document.getElementById('participants-count');
@@ -82,7 +200,7 @@ function formatTime(totalSeconds) {
 
 function formatDate(isoDate) {
   const d = new Date(isoDate + 'T00:00:00');
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(tr('dateLocale'), {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -106,15 +224,15 @@ function renderTimer(remaining, type) {
 
 function renderPhase(phase) {
   phaseEl.className = 'phase-label ' + (phase || '');
-  if (phase === 'focus') phaseEl.textContent = 'Focus Block';
-  else if (phase === 'break') phaseEl.textContent = 'Break';
+  if (phase === 'focus') phaseEl.textContent = tr('phaseLabel_focus');
+  else if (phase === 'break') phaseEl.textContent = tr('phaseLabel_break');
   else phaseEl.textContent = '';
 }
 
 function renderHint(phase, running) {
-  if (phase === 'focus' && running) hintEl.textContent = 'Timer running — stay focused';
-  else if (phase === 'break' && running) hintEl.textContent = 'Break in progress — rest up';
-  else hintEl.textContent = 'Ready to start';
+  if (phase === 'focus' && running) hintEl.textContent = tr('hint_focus');
+  else if (phase === 'break' && running) hintEl.textContent = tr('hint_break');
+  else hintEl.textContent = tr('hint_idle');
 }
 
 function renderControls(phase) {
@@ -131,17 +249,16 @@ function renderParticipants(participants, currentBlock) {
     participantsEl.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">◎</div>
-        <div class="empty-text">No participants yet</div>
-        <div class="empty-sub">Share the join link above</div>
+        <div class="empty-text">${tr('emptyText')}</div>
+        <div class="empty-sub">${tr('emptySub')}</div>
       </div>`;
     return;
   }
 
   participantsEl.innerHTML = participants.map((p) => {
     const taskIdx = currentBlock - 1;
-    const task = (p.tasks && p.tasks[taskIdx]) ? p.tasks[taskIdx] : '(no task for this block)';
+    const task = (p.tasks && p.tasks[taskIdx]) ? p.tasks[taskIdx] : tr('noTask');
     const isDone = currentBlock > p.blockCount;
-    const isActive = !isDone;
     const cardClass = isDone ? 'participant-card done' : 'participant-card active-block';
     const joinTime = new Date(p.joinedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -149,10 +266,10 @@ function renderParticipants(participants, currentBlock) {
       <div class="participant-name">${escapeHtml(p.name)}</div>
       <div class="participant-task">${escapeHtml(task)}</div>
       <div class="participant-meta">
-        <span>${p.blockCount} blocks</span>
+        <span>${p.blockCount} ${tr('blocksWord')}</span>
         <span>·</span>
-        <span>joined ${joinTime}</span>
-        ${isDone ? '<span>· done</span>' : ''}
+        <span>${tr('joinedWord')} ${joinTime}</span>
+        ${isDone ? `<span>· ${tr('doneWord')}</span>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -161,8 +278,8 @@ function renderParticipants(participants, currentBlock) {
 function applyState(state) {
   currentState = state;
 
-  dateEl.textContent = formatDate(state.session.date);
-  blockEl.textContent = `Block ${state.session.currentBlock}`;
+  dateEl.textContent  = formatDate(state.session.date);
+  blockEl.textContent = tr('blockDisplay', state.session.currentBlock);
 
   renderPhase(state.session.phase);
   renderControls(state.session.phase);
@@ -291,19 +408,19 @@ function resetRing() {
   ringTrack.style.strokeDasharray  = RING_CIRCUMFERENCE;
   ringTrack.style.strokeDashoffset = 0;
   ringTrack.className = 'ring-track idle';
-  ringTicksEl.innerHTML = '';
+  buildRingTicks(FOCUS_DEFAULT);
 }
 
 // ---------------------------------------------------------------------------
 // Socket events
 // ---------------------------------------------------------------------------
 socket.on('connect', () => {
-  statusEl.textContent = 'Connected';
+  statusEl.textContent = tr('connected');
   statusEl.className = 'status-connection connected';
 });
 
 socket.on('disconnect', () => {
-  statusEl.textContent = 'Disconnected';
+  statusEl.textContent = tr('disconnected');
   statusEl.className = 'status-connection disconnected';
 });
 
@@ -338,7 +455,7 @@ socket.on('timer:end', ({ type }) => {
   renderTimer(0, type);
   updateRing(0, ringDuration, type);
   timerEl.classList.add('end');
-  hintEl.textContent = type === 'focus' ? 'Focus block complete!' : 'Break complete!';
+  hintEl.textContent = type === 'focus' ? tr('focusComplete') : tr('breakComplete');
   setTimeout(() => {
     timerEl.classList.remove('end');
     resetRing();
@@ -394,6 +511,14 @@ resetModal.addEventListener('click', (e) => {
 });
 
 // ---------------------------------------------------------------------------
+// Digital clock — 24 h
+// ---------------------------------------------------------------------------
+function updateClock() {
+  const now = new Date();
+  if (timeEl) timeEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+
+// ---------------------------------------------------------------------------
 // Fetch join URL for display
 // ---------------------------------------------------------------------------
 async function fetchInfo() {
@@ -423,9 +548,20 @@ async function init() {
     renderTimer(FOCUS_DEFAULT, '');
     renderPhase('idle');
     renderControls('idle');
+    resetRing();
   }
 
   await fetchInfo();
+
+  // Clock
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Language toggle
+  document.querySelectorAll('.lang-btn').forEach(btn =>
+    btn.addEventListener('click', () => setLang(btn.dataset.lang))
+  );
+  setLang(currentLang); // apply translations + mark active button
 }
 
 init();
