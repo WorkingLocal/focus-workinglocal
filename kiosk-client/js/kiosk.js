@@ -375,25 +375,8 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_R; // ≈ 1162.39
 
 let ringDuration = FOCUS_DEFAULT;
 
-function buildRingTicks(duration) {
-  ringTicksEl.innerHTML = '';
-  for (let elapsed = 5 * 60; elapsed < duration; elapsed += 5 * 60) {
-    const fraction  = elapsed / duration;
-    const angleDeg  = fraction * 360;
-    const rad       = angleDeg * Math.PI / 180;
-    // Coordinates are in the rotate(-90) group space → visual 12 o'clock = angle 0
-    const x1 = (RING_CX + (RING_R - 13) * Math.cos(rad)).toFixed(2);
-    const y1 = (RING_CY + (RING_R - 13) * Math.sin(rad)).toFixed(2);
-    const x2 = (RING_CX + (RING_R + 10) * Math.cos(rad)).toFixed(2);
-    const y2 = (RING_CY + (RING_R + 10) * Math.sin(rad)).toFixed(2);
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1);
-    line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2);
-    line.setAttribute('y2', y2);
-    line.setAttribute('class', 'ring-tick');
-    ringTicksEl.appendChild(line);
-  }
+function buildRingTicks() {
+  ringTicksEl.innerHTML = ''; // markers disabled
 }
 
 function updateRing(remaining, duration, type) {
@@ -446,7 +429,18 @@ socket.on('timer:start', ({ type, remaining, duration }) => {
 socket.on('timer:tick', ({ remaining, type }) => {
   renderTimer(remaining, type);
   updateRing(remaining, ringDuration, type);
-  if (remaining > 0 && remaining <= 30) playTick();
+
+  // First 15 s after start: ticking
+  if (remaining > 0 && remaining >= ringDuration - 15) {
+    playTick();
+  // Focus only: warning bell at 10 min and 5 min remaining
+  } else if (type === 'focus' && (remaining === 600 || remaining === 300)) {
+    playAlarm();
+  // Last 30 s: ticking
+  } else if (remaining > 0 && remaining <= 30) {
+    playTick();
+  }
+
   if (currentState) currentState.timer.remaining = remaining;
 });
 
@@ -522,13 +516,13 @@ function updateClock() {
 // Fetch join URL for display
 // ---------------------------------------------------------------------------
 async function fetchInfo() {
+  const port = location.port ? `:${location.port}` : '';
+  joinUrlEl.textContent = `${location.hostname}${port}/join`;
   try {
     const res = await fetch('/api/info');
     const info = await res.json();
-    joinUrlEl.textContent = info.joinUrl;
-  } catch {
-    joinUrlEl.textContent = `${location.hostname}:${location.port}/join`;
-  }
+    if (info.joinUrl) joinUrlEl.textContent = info.joinUrl;
+  } catch { /* already showing local address */ }
 }
 
 // ---------------------------------------------------------------------------

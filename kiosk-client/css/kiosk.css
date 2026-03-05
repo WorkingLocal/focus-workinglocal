@@ -27,6 +27,7 @@
   --radius-sm:    8px;
 
   --header-h:     68px;
+  --block-bar-h:  50px;
   --footer-h:     36px;
 }
 
@@ -65,10 +66,6 @@ html, body {
   text-align: right;
 }
 
-.header-center {
-  flex-shrink: 0;
-}
-
 .header-logo {
   height: 44px;
   width: auto;
@@ -105,14 +102,6 @@ html, body {
   letter-spacing: 0.04em;
 }
 
-.header-block {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
 .header-join-label {
   font-size: 0.7rem;
   color: var(--text-dim);
@@ -128,10 +117,29 @@ html, body {
   letter-spacing: 0.03em;
 }
 
+/* ─── Block bar ───────────────────────────────────────────────────────────── */
+.block-bar {
+  height: var(--block-bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.block-bar-display {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
 /* ─── Main layout ─────────────────────────────────────────────────────────── */
 .main {
   display: flex;
-  height: calc(100vh - var(--header-h) - var(--footer-h));
+  height: calc(100vh - var(--header-h) - var(--block-bar-h) - var(--footer-h));
   overflow: hidden;
 }
 
@@ -178,13 +186,13 @@ html, body {
 
 .ring-bg {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.05);
-  stroke-width: 5;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 25;
 }
 
 .ring-track {
   fill: none;
-  stroke-width: 5;
+  stroke-width: 25;
   stroke-linecap: round;
   stroke-dasharray: 1162.39;
   stroke-dashoffset: 0;
