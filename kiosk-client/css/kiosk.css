@@ -6,21 +6,22 @@
 }
 
 :root {
-  --bg:           #08090d;
-  --surface:      #0f1117;
-  --surface-2:    #161820;
+  --bg:           #07090e;
+  --surface:      #0d1018;
+  --surface-2:    #141720;
   --border:       rgba(255, 255, 255, 0.07);
-  --text:         #e2e4ed;
-  --text-muted:   #5a5e72;
-  --text-dim:     #30333f;
+  --text:         #e4e6f0;
+  --text-muted:   #5c6080;
+  --text-dim:     #2e3245;
 
-  --focus-color:  #4a9eff;
-  --focus-bg:     rgba(74, 158, 255, 0.08);
-  --break-color:  #4ade80;
-  --break-bg:     rgba(74, 222, 128, 0.08);
+  /* Working Local brand colours */
+  --focus-color:  #5b9bd5;        /* brand blue  #4f81ad brightened for dark bg */
+  --focus-bg:     rgba(91, 155, 213, 0.08);
+  --break-color:  #01ba7c;        /* brand green */
+  --break-bg:     rgba(1, 186, 124, 0.08);
   --stop-color:   #f87171;
   --stop-bg:      rgba(248, 113, 113, 0.08);
-  --gold:         #c8a94a;
+  --gold:         #fed308;        /* brand yellow */
 
   --radius:       14px;
   --radius-sm:    8px;
@@ -34,7 +35,7 @@ html, body {
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -63,6 +64,23 @@ html, body {
 
 .header-center {
   flex-shrink: 0;
+}
+
+.header-logo {
+  height: 22px;
+  width: auto;
+  display: block;
+  margin-bottom: 4px;
+  filter: brightness(0) invert(1) opacity(0.55);
+}
+
+.header-logo-fallback {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--focus-color);
+  margin-bottom: 4px;
 }
 
 .header-date {
@@ -124,8 +142,53 @@ html, body {
 .phase-label.focus { color: var(--focus-color); }
 .phase-label.break { color: var(--break-color); }
 
+/* ─── Progress Ring ───────────────────────────────────────────────────────── */
+.timer-ring-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(280px, 38vw, 540px);
+  height: clamp(280px, 38vw, 540px);
+}
+
+.progress-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 5;
+}
+
+.ring-track {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 1162.39;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.4s;
+}
+
+.ring-track.focus { stroke: var(--focus-color); opacity: 0.75; }
+.ring-track.break { stroke: var(--break-color); opacity: 0.75; }
+.ring-track.idle  { stroke: var(--text-dim);    opacity: 0.5;  }
+
+.ring-tick {
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
 .timer-display {
-  font-size: clamp(5rem, 14vw, 10rem);
+  position: relative;
+  z-index: 1;
+  font-size: clamp(4rem, 12vw, 9rem);
   font-weight: 200;
   letter-spacing: -0.04em;
   color: var(--text-dim);

@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Join Focus Session</title>
+  <title>Join — Working Local Focus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/join.css" />
 </head>
 <body>
@@ -13,8 +16,17 @@
 
     <!-- ── Logo / branding ─────────────────────────────────────────────── -->
     <div class="brand">
-      <div class="brand-mark">◉</div>
-      <div class="brand-name">Focus Session</div>
+      <img
+        src="https://workinglocal.be/wp-content/uploads/2023/12/Digitale-onafhankelijkheid-1.png"
+        alt="Working Local"
+        class="brand-logo"
+        onerror="this.style.display='none'; document.getElementById('brand-fallback').style.display='flex';"
+      />
+      <div id="brand-fallback" class="brand-fallback" style="display:none">
+        <div class="brand-mark">◉</div>
+        <div class="brand-name">Working Local</div>
+      </div>
+      <div class="brand-sub">Focus Session</div>
     </div>
 
     <!-- ── Registration form ───────────────────────────────────────────── -->

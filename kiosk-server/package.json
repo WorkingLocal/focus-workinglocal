@@ -1,7 +1,7 @@
 {
   "name": "focus-kiosk-server",
-  "version": "1.0.0",
-  "description": "Focus Kiosk local server - Node.js backend for the Focus Workinglocal MVP",
+  "version": "1.1.0",
+  "description": "Focus Kiosk local server - Node.js backend for the Focus Workinglocal",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
