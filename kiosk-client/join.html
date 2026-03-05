@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Join Focus Session</title>
+  <link rel="stylesheet" href="/css/join.css" />
+</head>
+<body>
+
+  <div class="page">
+
+    <!-- ── Logo / branding ─────────────────────────────────────────────── -->
+    <div class="brand">
+      <div class="brand-mark">◉</div>
+      <div class="brand-name">Focus Session</div>
+    </div>
+
+    <!-- ── Registration form ───────────────────────────────────────────── -->
+    <section id="form-section">
+      <form id="join-form" novalidate>
+
+        <!-- Name -->
+        <div class="field-group">
+          <label class="field-label" for="name">Your Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="field-input"
+            placeholder="e.g. Alex"
+            maxlength="60"
+            autocomplete="name"
+            autocorrect="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <!-- Block count -->
+        <div class="field-group">
+          <label class="field-label">Focus Blocks</label>
+          <div class="block-choice">
+            <label class="choice-card" id="choice-6">
+              <input type="radio" name="blockCount" value="6" />
+              <div class="choice-body">
+                <div class="choice-title">6 Blocks</div>
+                <div class="choice-sub">~3 hours</div>
+              </div>
+            </label>
+            <label class="choice-card" id="choice-12">
+              <input type="radio" name="blockCount" value="12" />
+              <div class="choice-body">
+                <div class="choice-title">12 Blocks</div>
+                <div class="choice-sub">~6 hours</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Task fields (revealed after block count selection) -->
+        <div id="tasks-section" class="tasks-section" style="display:none">
+          <div class="tasks-header">
+            <span class="field-label">Tasks Per Block</span>
+            <span class="tasks-hint">What will you work on in each 25-minute block?</span>
+          </div>
+          <div id="tasks-container"></div>
+        </div>
+
+        <!-- Error message -->
+        <div id="error-msg" class="error-msg" role="alert"></div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" id="btn-submit" disabled>
+          Join Session
+        </button>
+
+      </form>
+    </section>
+
+    <!-- ── Confirmation / participant view ─────────────────────────────── -->
+    <section id="confirm-section" style="display:none">
+
+      <div class="confirm-card">
+        <div class="confirm-check">✓</div>
+        <h2 class="confirm-title">You're in, <span id="confirm-name"></span>!</h2>
+        <p class="confirm-meta"><span id="confirm-blocks"></span> registered</p>
+      </div>
+
+      <div class="session-panel">
+        <div class="session-row">
+          <span class="session-label">Current Block</span>
+          <span class="session-value" id="current-block">—</span>
+        </div>
+        <div class="session-row">
+          <span class="session-label">Phase</span>
+          <span class="phase-badge idle" id="current-phase">Waiting</span>
+        </div>
+        <div class="session-row">
+          <span class="session-label">Timer</span>
+          <span class="session-value timer-value" id="current-timer">—:——</span>
+        </div>
+        <div class="my-task-box">
+          <div class="my-task-label">Your task this block:</div>
+          <div class="my-task-text" id="my-task">—</div>
+        </div>
+      </div>
+
+      <button class="btn-update" onclick="location.reload()">Update My Tasks</button>
+
+    </section>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/join.js"></script>
+</body>
+</html>

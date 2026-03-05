@@ -1,0 +1,5 @@
+node_modules/
+kiosk-server/session-state.json
+.env
+.DS_Store
+Thumbs.db

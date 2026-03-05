@@ -1,0 +1,359 @@
+/* ─── Reset & Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:           #0d0f14;
+  --surface:      #13151c;
+  --surface-2:    #1b1e28;
+  --border:       rgba(255, 255, 255, 0.08);
+  --text:         #e2e4ed;
+  --text-muted:   #6b7091;
+  --text-dim:     #363a4f;
+
+  --focus-color:  #4a9eff;
+  --break-color:  #4ade80;
+  --error-color:  #f87171;
+  --gold:         #c8a94a;
+
+  --radius:       16px;
+  --radius-sm:    10px;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px 48px;
+}
+
+/* ─── Page wrapper ────────────────────────────────────────────────────────── */
+.page {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── Brand ───────────────────────────────────────────────────────────────── */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.brand-mark {
+  font-size: 1.6rem;
+  color: var(--focus-color);
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Form ────────────────────────────────────────────────────────────────── */
+#join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Field group */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.field-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  padding: 14px 16px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+
+.field-input::placeholder { color: var(--text-dim); }
+.field-input:focus { border-color: var(--focus-color); }
+
+/* Block choice */
+.block-choice {
+  display: flex;
+  gap: 12px;
+}
+
+.choice-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.choice-card input[type="radio"] {
+  display: none;
+}
+
+.choice-card:has(input:checked) {
+  border-color: var(--focus-color);
+  background: rgba(74, 158, 255, 0.07);
+}
+
+.choice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.choice-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.choice-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Tasks section */
+.tasks-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tasks-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tasks-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.task-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-field label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.task-field input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 11px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+
+.task-field input::placeholder { color: var(--text-dim); }
+.task-field input:focus { border-color: var(--focus-color); }
+
+/* Error */
+.error-msg {
+  color: var(--error-color);
+  font-size: 0.85rem;
+  min-height: 18px;
+}
+
+/* Submit button */
+.btn-submit {
+  background: var(--focus-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 16px;
+  width: 100%;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-submit:active:not(:disabled) { transform: scale(0.97); }
+.btn-submit:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ─── Confirmation ────────────────────────────────────────────────────────── */
+.confirm-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-check {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--break-color);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.confirm-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.confirm-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Session panel */
+.session-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.session-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.session-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.session-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.timer-value {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--focus-color);
+}
+
+/* Phase badge */
+.phase-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.phase-badge.idle  { background: var(--surface-2); color: var(--text-muted); }
+.phase-badge.focus { background: rgba(74, 158, 255, 0.12); color: var(--focus-color); }
+.phase-badge.break { background: rgba(74, 222, 128, 0.12); color: var(--break-color); }
+
+/* My task */
+.my-task-box {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.my-task-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.my-task-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* Update button */
+.btn-update {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 12px;
+  width: 100%;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.btn-update:hover { background: var(--surface-2); }

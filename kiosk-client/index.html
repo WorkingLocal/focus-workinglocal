@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Focus Kiosk</title>
+  <link rel="stylesheet" href="/css/kiosk.css" />
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-date" id="date-display">—</div>
+    </div>
+    <div class="header-center">
+      <div class="header-block" id="block-display">Block 1</div>
+    </div>
+    <div class="header-right">
+      <div class="header-join-label">Participants join at:</div>
+      <div class="header-join-url" id="join-url">loading…</div>
+    </div>
+  </header>
+
+  <!-- ── Main ───────────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Timer section -->
+    <section class="timer-section">
+      <div class="phase-label" id="phase-label"></div>
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-hint" id="timer-hint">Ready to start</div>
+
+      <div class="controls">
+        <button class="btn btn-focus" id="btn-focus" aria-label="Start Focus Block">
+          <span class="btn-icon">▶</span>
+          <span>Start Focus</span>
+        </button>
+        <button class="btn btn-break" id="btn-break" aria-label="Start Break">
+          <span class="btn-icon">☕</span>
+          <span>Start Break</span>
+        </button>
+        <button class="btn btn-stop" id="btn-stop" aria-label="Stop Timer" disabled>
+          <span class="btn-icon">■</span>
+          <span>Stop</span>
+        </button>
+        <button class="btn btn-next" id="btn-next" aria-label="Next Block">
+          <span class="btn-icon">⏭</span>
+          <span>Next Block</span>
+        </button>
+        <button class="btn btn-reset" id="btn-reset" aria-label="Reset Session">
+          <span class="btn-icon">↺</span>
+          <span>Reset</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Participants section -->
+    <aside class="participants-section">
+      <div class="participants-header">
+        <span class="participants-title">Participants</span>
+        <span class="participants-count" id="participants-count">0</span>
+      </div>
+      <div class="participants-list" id="participants-list">
+        <div class="empty-state">
+          <div class="empty-icon">◎</div>
+          <div class="empty-text">No participants yet</div>
+          <div class="empty-sub">Share the join link above</div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ── Status bar ─────────────────────────────────────────────────────── -->
+  <footer class="status-bar">
+    <span class="status-app">Focus Kiosk · MVP</span>
+    <span class="status-connection" id="connection-status">Connecting…</span>
+  </footer>
+
+  <!-- ── Reset confirm modal ───────────────────────────────────────────── -->
+  <div class="modal-overlay" id="reset-modal" style="display:none">
+    <div class="modal">
+      <h2>Reset Session?</h2>
+      <p>This will clear all participants and return to Block 1. This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-reset-confirm" id="btn-reset-confirm">Yes, Reset</button>
+        <button class="btn btn-cancel" id="btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/kiosk.js"></script>
+</body>
+</html>
