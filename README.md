@@ -1,4 +1,4 @@
-# Focus Kiosk — Working Local (MVP)
+# Focus Kiosk — Working Local
 
 A touchscreen kiosk web app for running guided Pomodoro focus sessions on a local network.
 
@@ -59,7 +59,17 @@ focus-workinglocal/
 │       └── join.js
 ├── docs/
 │   └── architecture.md    # Full technical architecture
-├── infra/                 # Future deployment configs (Phase 2)
+├── infra/                 # Deployment configs (Cloudflare Tunnel, Caddy, PM2)
+│   ├── cloudflare/
+│   │   └── config.yml     # cloudflared tunnel config template (kiosk)
+│   ├── vps/
+│   │   ├── Caddyfile      # Caddy reverse proxy for focus.workinglocal.be
+│   │   └── ecosystem.config.cjs  # PM2 process config
+│   └── .env.example       # Environment variable template
+├── docs/
+│   ├── architecture.md    # Full technical architecture
+│   └── deployment.md      # Step-by-step deployment guide
+├── CHANGELOG.md
 └── README.md
 ```
 
@@ -77,8 +87,10 @@ focus-workinglocal/
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3000` | Server port |
+| `PUBLIC_URL` | _(auto)_ | Base URL returned in join URL (set when behind a tunnel or proxy) |
+| `OPERATOR_SECRET` | _(none)_ | Protects timer/session controls; leave empty for local LAN use |
 
-Example: `PORT=8080 npm start`
+Copy `infra/.env.example` to `kiosk-server/.env` and fill in values. See [docs/deployment.md](docs/deployment.md) for full setup instructions.
 
 ## Session Controls (Kiosk)
 
@@ -90,6 +102,7 @@ Example: `PORT=8080 npm start`
 | Next Block | Advance to next block (skips timer) |
 | Reset | Clear all participants, return to Block 1 |
 
-## Architecture
+## Architecture & Deployment
 
-See [docs/architecture.md](docs/architecture.md) for full technical details including WebSocket event reference and Phase 2 extension points.
+See [docs/architecture.md](docs/architecture.md) for full technical details and WebSocket event reference.
+See [docs/deployment.md](docs/deployment.md) for kiosk (Cloudflare Tunnel) and VPS (Caddy + PM2) setup.

@@ -1,8 +1,8 @@
-# Focus Kiosk — Architecture (MVP)
+# Focus Kiosk — Architecture
 
 ## Overview
 
-The MVP runs entirely on the local network. A Windows tablet/device runs the kiosk server and displays the kiosk UI. Participants on the same Wi-Fi network open `http://<kiosk-IP>:3000/join` on their phones or laptops.
+The server runs on a local or public network. A Windows tablet/device runs the kiosk server and displays the kiosk UI. Participants on the same Wi-Fi network open `http://<kiosk-IP>:3000/join` on their phones or laptops, or join via the public URL when deployed to a VPS.
 
 ---
 
@@ -44,6 +44,8 @@ The MVP runs entirely on the local network. A Windows tablet/device runs the kio
 | `timer:tick` | `{ remaining, type }` | Every second while running |
 | `timer:end` | `{ type }` | Timer reached zero |
 | `timer:stopped` | `{}` | Timer manually stopped |
+| `timer:paused` | `{}` | Timer paused |
+| `timer:resumed` | `{ remaining }` | Timer resumed |
 | `participants:updated` | `{ participants }` | Participant list changed |
 
 *Client → Server (kiosk operator):*
@@ -52,6 +54,8 @@ The MVP runs entirely on the local network. A Windows tablet/device runs the kio
 | `timer:startFocus` | Start 25-minute focus timer |
 | `timer:startBreak` | Start 10-minute break timer |
 | `timer:stop` | Stop current timer |
+| `timer:pause` | Pause current timer |
+| `timer:resume` | Resume paused timer |
 | `session:nextBlock` | Advance to next block without timer |
 | `session:reset` | Reset entire session |
 
@@ -107,18 +111,38 @@ Opened by participants on their own devices.
 
 ---
 
-## Phase 2 Hooks (not implemented in MVP)
+## Public Deployment (v1.2.0)
 
-The following architectural decisions keep Phase 2 (hybrid online participation) addable without refactoring:
+Two deployment targets share the same codebase:
+
+| Target | URL | Setup |
+|--------|-----|-------|
+| Kiosk (local tablet) | `https://kiosk.workinglocal.be` | Cloudflare Tunnel → `localhost:3000` |
+| VPS | `https://focus.workinglocal.be` | Caddy reverse proxy → PM2 Node.js |
+
+**Environment variables:**
+
+| Variable | Description |
+|----------|-------------|
+| `PUBLIC_URL` | Base URL returned in `/api/info` join URL |
+| `OPERATOR_SECRET` | Protects timer/session socket events via handshake auth |
+| `PORT` | Server port (default: 3000) |
+
+**Operator authentication:**
+- Operator opens `https://focus.workinglocal.be/?key=<OPERATOR_SECRET>`
+- The key is read from `location.search` and passed as `socket.handshake.auth.secret`
+- All `timer:*` and `session:*` server handlers verify `isOperator(socket)` before acting
+- Participants on `/join` are never affected
+
+See [deployment.md](deployment.md) for full setup instructions.
+
+---
+
+## Extension Points
+
+The following architectural decisions make future extensions straightforward without a core refactor:
 
 1. **Event-driven state** — all mutations are events; a cloud relay can mirror them over a second Socket.IO connection.
-2. **Namespaced WebSocket** — `/ws` can be re-mapped to a remote relay in Phase 2 with a single config change.
+2. **Namespaced WebSocket** — `/ws` can be re-mapped to a remote relay with a single config change.
 3. **Abstracted persistence** — the `saveState` / `loadState` functions are isolated; swapping JSON for Redis is a one-file change.
-4. **REST `/api/state`** — allows stateless clients (online participants) to sync on connect without needing WebSocket history.
-
-**Planned Phase 2 additions:**
-- Cloud relay server (Node.js + Socket.IO bridge)
-- Caddy reverse proxy with HTTPS
-- Redis Pub/Sub for multi-node scaling
-- Online join UI (accessible outside local network)
-- Authentication tokens for operator controls
+4. **REST `/api/state`** — allows stateless clients to sync on connect without needing WebSocket history.
