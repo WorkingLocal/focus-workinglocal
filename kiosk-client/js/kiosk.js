@@ -251,9 +251,11 @@ function renderControls(phase, paused = false) {
   btnFocus.disabled = active;
   btnBreak.disabled = active;
   btnStop.disabled  = !active;
-  btnPause.disabled = !active;
-  btnPause.querySelector('span.btn-icon').textContent    = paused ? '▶' : '⏸';
-  btnPause.querySelector('span:last-child').textContent  = paused ? tr('btnResume') : tr('btnPause');
+  if (btnPause) {
+    btnPause.disabled = !active;
+    btnPause.querySelector('span.btn-icon').textContent   = paused ? '▶' : '⏸';
+    btnPause.querySelector('span:last-child').textContent = paused ? tr('btnResume') : tr('btnPause');
+  }
 }
 
 function renderParticipants(participants, currentBlock) {
@@ -520,7 +522,7 @@ socket.on('participants:updated', ({ participants }) => {
 btnFocus.addEventListener('click', () => socket.emit('timer:startFocus'));
 btnBreak.addEventListener('click', () => socket.emit('timer:startBreak'));
 btnStop.addEventListener('click',  () => socket.emit('timer:stop'));
-btnPause.addEventListener('click', () => {
+if (btnPause) btnPause.addEventListener('click', () => {
   const paused = currentState && currentState.timer.paused;
   socket.emit(paused ? 'timer:resume' : 'timer:pause');
 });
