@@ -327,7 +327,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   const ip = getLocalIP();
   console.log('');
   console.log('  ╔══════════════════════════════════════╗');
-  console.log('  ║       Focus Kiosk Server (MVP)       ║');
+  console.log('  ║        Focus Kiosk Server v1.2        ║');
   console.log('  ╠══════════════════════════════════════╣');
   console.log(`  ║  Kiosk UI : http://${ip}:${PORT}${' '.repeat(Math.max(0, 14 - ip.length - String(PORT).length))}║`);
   console.log(`  ║  Join URL : http://${ip}:${PORT}/join${' '.repeat(Math.max(0, 9 - ip.length - String(PORT).length))}║`);
