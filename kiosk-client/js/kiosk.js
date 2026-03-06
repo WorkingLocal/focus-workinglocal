@@ -33,7 +33,7 @@ const TRANSLATIONS = {
     modalBody:         'This will clear all participants and return to Block 1. This cannot be undone.',
     btnResetConfirm:   'Yes, Reset',
     btnCancel:         'Cancel',
-    statusApp:         'Working Local · Focus Kiosk v1.1.3',
+    statusApp:         'Working Local · Focus Kiosk v1.2.0',
     connecting:        'Connecting…',
     connected:         'Connected',
     disconnected:      'Disconnected',
@@ -68,7 +68,7 @@ const TRANSLATIONS = {
     modalBody:         'Dit wist alle deelnemers en keert terug naar Blok 1. Dit kan niet ongedaan worden gemaakt.',
     btnResetConfirm:   'Ja, herstarten',
     btnCancel:         'Annuleren',
-    statusApp:         'Working Local · Focus Kiosk v1.1.3',
+    statusApp:         'Working Local · Focus Kiosk v1.2.0',
     connecting:        'Verbinden…',
     connected:         'Verbonden',
     disconnected:      'Verbroken',
@@ -128,8 +128,10 @@ function setLang(lang) {
 
 // ---------------------------------------------------------------------------
 // Socket.IO — connect to /ws namespace
+// Operator key passed via ?key=... URL param (set on kiosk browser / operator URL)
 // ---------------------------------------------------------------------------
-const socket = io('/ws');
+const operatorKey = new URLSearchParams(location.search).get('key') || '';
+const socket = io('/ws', { auth: { secret: operatorKey } });
 
 // ---------------------------------------------------------------------------
 // IndexedDB — offline resilience cache

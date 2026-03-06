@@ -10,7 +10,9 @@ const os = require('os');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const PORT = process.env.PORT || 3000;
+const PORT            = process.env.PORT            || 3000;
+const PUBLIC_URL      = (process.env.PUBLIC_URL      || '').replace(/\/$/, '');
+const OPERATOR_SECRET = process.env.OPERATOR_SECRET  || '';
 const STATE_FILE = path.join(__dirname, 'session-state.json');
 const CLIENT_DIR = path.join(__dirname, '../kiosk-client');
 const FOCUS_DURATION = 25 * 60; // seconds
@@ -173,6 +175,7 @@ function getLocalIP() {
 // ---------------------------------------------------------------------------
 // HTTP Routes
 // ---------------------------------------------------------------------------
+app.set('trust proxy', 1); // trust Cloudflare / Caddy reverse proxy
 app.use(express.json());
 app.use(express.static(CLIENT_DIR));
 
@@ -193,12 +196,13 @@ app.get('/api/state', (_req, res) => {
 
 // Server info for IP display on kiosk
 app.get('/api/info', (_req, res) => {
-  const ip = getLocalIP();
+  const ip   = getLocalIP();
+  const base = PUBLIC_URL || `http://${ip}:${PORT}`;
   res.json({
     ip,
     port: PORT,
-    joinUrl: `http://${ip}:${PORT}/join`,
-    kioskUrl: `http://${ip}:${PORT}`,
+    joinUrl:  `${base}/join`,
+    kioskUrl: base,
   });
 });
 
@@ -242,42 +246,56 @@ app.post('/api/participants', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Operator auth — socket must present correct secret when OPERATOR_SECRET is set
+// ---------------------------------------------------------------------------
+function isOperator(socket) {
+  return !OPERATOR_SECRET || socket.handshake.auth.secret === OPERATOR_SECRET;
+}
+
+// ---------------------------------------------------------------------------
 // WebSocket — /ws namespace
 // ---------------------------------------------------------------------------
 ws.on('connection', (socket) => {
-  console.log(`[ws] Client connected: ${socket.id}`);
+  console.log(`[ws] Client connected: ${socket.id} operator=${isOperator(socket)}`);
 
   // Send full state immediately on connect
   socket.emit('session:state', state);
 
-  // --- Timer controls (kiosk operator) ---
+  // --- Timer controls (kiosk operator only) ---
   socket.on('timer:startFocus', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] timer:startFocus');
     startTimer('focus');
   });
 
   socket.on('timer:startBreak', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] timer:startBreak');
     startTimer('break');
   });
 
   socket.on('timer:stop', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] timer:stop');
     stopTimer(true);
   });
 
   socket.on('timer:pause', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] timer:pause');
     pauseTimer();
   });
 
   socket.on('timer:resume', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] timer:resume');
     resumeTimer();
   });
 
-  // --- Session controls ---
+  // --- Session controls (kiosk operator only) ---
   socket.on('session:nextBlock', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] session:nextBlock');
     stopTimer(false);
     state.session.currentBlock += 1;
@@ -286,6 +304,7 @@ ws.on('connection', (socket) => {
   });
 
   socket.on('session:reset', () => {
+    if (!isOperator(socket)) return;
     console.log('[ws] session:reset');
     stopTimer(false);
     state = createInitialState();

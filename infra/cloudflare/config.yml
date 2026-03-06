@@ -1,0 +1,13 @@
+# Cloudflare Tunnel config — kiosk device
+# Place at: C:\Users\<user>\.cloudflared\config.yml  (Windows)
+#            ~/.cloudflared/config.yml               (Linux/macOS)
+#
+# Replace <TUNNEL_ID> with the ID shown after: cloudflared tunnel create focus-kiosk
+
+tunnel: <TUNNEL_ID>
+credentials-file: C:\Users\<user>\.cloudflared\<TUNNEL_ID>.json
+
+ingress:
+  - hostname: kiosk.workinglocal.be
+    service: http://localhost:3000
+  - service: http_status:404

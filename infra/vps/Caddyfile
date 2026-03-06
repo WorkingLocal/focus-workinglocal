@@ -1,0 +1,3 @@
+focus.workinglocal.be {
+    reverse_proxy localhost:3000
+}
