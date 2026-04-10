@@ -1,0 +1,7 @@
+kiosk-server/node_modules
+.git
+.gitignore
+*.md
+infra
+docs
+kiosk-client
