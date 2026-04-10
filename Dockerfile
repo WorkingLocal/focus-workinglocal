@@ -6,6 +6,7 @@ COPY kiosk-server/package*.json ./
 RUN apk add --no-cache wget && npm ci --omit=dev
 
 COPY kiosk-server/ .
+COPY kiosk-client/ /kiosk-client/
 
 EXPOSE 3000
 
