@@ -84,21 +84,42 @@ New-NetFirewallRule -Name "windows-exporter-9182" -DisplayName "Prometheus windo
 
 Thermalzone output: `windows_thermalzone_temperature_celsius{name="\\_TZ.TZ00"}` ✅
 
-### Stap 5 — Chromium kiosk (⏳ nog te doen)
+### Stap 5 — Chromium kiosk (✅ voltooid 2026-06-30)
+
+⚠️ **Belangrijk:** het ingebouwde `Administrator`-account is **disabled** op deze machine. Alle auto-login/beheer gebeurt via het lokale account `Working Local Kiosk` (zie Credentials hierboven — dit is ook de oorzaak van een eerdere SSH "connection reset": authenticeren tegen een disabled account laat Windows OpenSSH de verbinding resetten i.p.v. netjes "Permission denied" geven).
 
 ```powershell
+# Chrome pad detecteren
+$chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"  # of (x86) variant
+
 # Auto-login instellen
 $regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 Set-ItemProperty $regPath "AutoAdminLogon" "1"
-Set-ItemProperty $regPath "DefaultUserName" "Administrator"
-Set-ItemProperty $regPath "DefaultPassword" "<wachtwoord>"
+Set-ItemProperty $regPath "DefaultUserName" "Working Local Kiosk"
+Set-ItemProperty $regPath "DefaultPassword" "<wachtwoord uit Vaultwarden>"
+Set-ItemProperty $regPath "DefaultDomainName" $env:COMPUTERNAME
 
 # Scheduled Task: Chromium kiosk bij login
-$action = New-ScheduledTaskAction -Execute "chrome.exe" `
-    -Argument "--kiosk https://focus.workinglocal.be --no-first-run --disable-infobars"
-$trigger = New-ScheduledTaskTrigger -AtLogOn
-Register-ScheduledTask -TaskName "FocusKiosk" -Action $action -Trigger $trigger -RunLevel Highest -Force
+$action = New-ScheduledTaskAction -Execute $chrome `
+    -Argument "--kiosk https://focus.workinglocal.be --no-first-run --disable-infobars --noerrdialogs"
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User "Working Local Kiosk"
+$settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0
+Register-ScheduledTask -TaskName "FocusKiosk" -Action $action -Trigger $trigger -Settings $settings -RunLevel Highest -Force
 ```
+
+**Uitgevoerd headless via WMI + SMB** (SSH/WinRM bleken niet bruikbaar vanaf een niet-elevated client zonder TrustedHosts-wijziging):
+- `Invoke-WmiMethod -Class Win32_Process -Name Create` voor remote scriptexecutie
+- `New-PSDrive` naar `\\100.72.174.92\C$` voor file transfer + log uitlezen
+
+**Geverifieerd:**
+| Setting | Waarde |
+|---|---|
+| AutoAdminLogon | 1 |
+| DefaultUserName | Working Local Kiosk |
+| FocusKiosk task state | Ready |
+| Task args | `--kiosk https://focus.workinglocal.be --no-first-run --disable-infobars --noerrdialogs` |
+
+Test bij volgende herstart: machine moet automatisch inloggen en Chrome in kiosk-mode openen op focus.workinglocal.be.
 
 ### Stap 6 — IP migreren in Unifi (⏳ nog te doen)
 
@@ -134,6 +155,6 @@ targets: ['192.168.111.120:9182']
 | Tailscale | ✅ 100.72.174.92 |
 | windows_exporter + Prometheus | ✅ UP |
 | Alert rules Grafana | ✅ |
-| Chromium kiosk Scheduled Task | ⏳ |
+| Chromium kiosk Scheduled Task | ✅ |
 | IP migratie .34 → .120 | ⏳ |
 | Grafana overview panel | ⏳ |
