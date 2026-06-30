@@ -157,4 +157,4 @@ targets: ['192.168.111.120:9182']
 | Alert rules Grafana | ✅ |
 | Chromium kiosk Scheduled Task | ✅ |
 | IP migratie .34 → .120 | ⏳ |
-| Grafana overview panel | ⏳ |
+| Grafana overview panel | ✅ KIOSK-TOUCH in RAM Windows panel (v2) |
